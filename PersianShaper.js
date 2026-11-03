@@ -178,7 +178,9 @@ function convertArabic(normal) {
 				} else {
 					shaped += String.fromCharCode(combcrep[1]);
 				}
-					i = i+1;
+				/* Keep any diacritics between lam and alef, after the ligature. */
+				shaped += normal.substring(i + 1, nextID);
+				i = nextID;
 				continue;
 			}
 			

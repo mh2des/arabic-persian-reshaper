@@ -128,15 +128,25 @@ Object.keys(shapers).forEach(function (name) {
 			});
 
 			/*
-				Bug: when a diacritic sits between lam and alef, convertArabic
-				finds the alef past the diacritic but then skips only one
-				character (i = i+1). The diacritic is dropped and the alef is
-				shaped a second time, so "لَا" currently becomes FEFB FE8E.
-				The diacritic should be kept after the ligature.
+				A diacritic between lam and alef doesn't stop the ligature.
+				It is written right after the ligature. Up to 1.0.1 it was
+				dropped and the alef was output a second time.
 			*/
-			it("keeps a diacritic between lam and alef", { todo: "lam-alef branch drops the diacritic and repeats the alef" }, function () {
+			it("keeps a diacritic between lam and alef", function () {
 				assert.strictEqual(hex(convertArabic("لَا")), "FEFB 064E");
 				assert.strictEqual(hex(convertArabic("بلَا")), "FE91 FEFC 064E");
+			});
+
+			it("keeps several diacritics between lam and alef, in order", function () {
+				// إِلَّا written as alef-hamza, kasra, lam, shadda, fatha, alef
+				assert.strictEqual(hex(convertArabic("إِلَّا")), "FE87 0650 FEFB 0651 064E");
+				assert.strictEqual(hex(convertArabic("لَّا")), "FEFB 064E 0651");
+			});
+
+			it("starts a new joined group after a ligature with a diacritic", function () {
+				assert.strictEqual(hex(convertArabic("لَاب")), "FEFB 064E FE8F");
+				assert.strictEqual(hex(convertArabic("بلَاب")), "FE91 FEFC 064E FE8F");
+				assert.strictEqual(hex(convertArabic("لَابب")), "FEFB 064E FE91 FE90");
 			});
 		});
 
@@ -200,6 +210,19 @@ Object.keys(shapers).forEach(function (name) {
 			it("splits the لا ligature into lam and alef", function () {
 				assert.strictEqual(convertArabicBack("ﻻ"), "لا");
 				assert.strictEqual(convertArabicBack("ﻼ"), "لا");
+			});
+
+			/*
+				The ligature is one code point, so a diacritic after it can't
+				be traced back to the lam or the alef. لَا and لاَ shape the
+				same, and convertArabicBack returns the diacritic after the
+				alef for both. Base letters and diacritics are all kept.
+			*/
+			it("returns a diacritic from between lam and alef after the alef", function () {
+				assert.strictEqual(convertArabic("لَا"), convertArabic("لاَ"));
+				assert.strictEqual(convertArabicBack(convertArabic("لَا")), "لاَ");
+				assert.strictEqual(convertArabicBack(convertArabic("بلَا")), "بلاَ");
+				assert.strictEqual(convertArabicBack(convertArabic("لاَ")), "لاَ");
 			});
 
 			[

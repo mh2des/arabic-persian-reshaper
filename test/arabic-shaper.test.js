@@ -35,6 +35,12 @@ describe("ArabicShaper", function () {
 			assert.strictEqual(hex(convertArabic("سلأ")), "FEB3 FEF8");
 		});
 
+		it("keeps diacritics on both the lam and the alef", function () {
+			// لِأَنَّ written as lam, kasra, alef-hamza, fatha, noon, shadda, fatha
+			assert.strictEqual(hex(convertArabic("لِأَنَّ")), "FEF7 0650 064E FEE5 0651 064E");
+			assert.strictEqual(hex(convertArabic("بلِآ")), "FE91 FEF6 0650");
+		});
+
 		it("splits the ligatures back into lam and alef", function () {
 			assert.strictEqual(convertArabicBack("ﻷﻸ"), "لألأ");
 			assert.strictEqual(convertArabicBack("ﻹﻺ"), "لإلإ");
