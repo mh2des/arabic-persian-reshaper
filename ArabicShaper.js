@@ -48,15 +48,14 @@ var charsMap = [
 		/* (arabic edit):
 		 	-added missing forms in Alef_MAKSURA
 		*/
-		[ 0x0649, 0xFEEF, 0xFBE8, 0xFBE9, 0xFBFD ], /* ALEF_MAKSURA */
+		[ 0x0649, 0xFEEF, 0xFBE8, 0xFBE9, 0xFEF0 ], /* ALEF_MAKSURA */
 		[ 0x064A, 0xFEF1, 0xFEF3, 0xFEF4, 0xFEF2 ], /* YEH Arabic */
 
-		/* (arabic edit):
-			-there's a bug/oversight in JavaScript where the fianl form of Alef_MAKSURA should be 1640 instead it is 1709
-			the same as YEH Farsi. so I changed the YEH Farsi final form value from 0xFBFD to 0xFEF0
-			to point to the final form of ALEF_MAKSURA in the Arabic font.
+		/*
+			Final ى is U+FEF0 and final ی is U+FBFD. Many fonts draw the two
+			alike, but they are different letters, so don't swap them.
 		*/
-		[ 0x06CC, 0xFBFC, 0xFBFE, 0xFBFF, 0xFEF0 ], /* YEH Farsi */
+		[ 0x06CC, 0xFBFC, 0xFBFE, 0xFBFF, 0xFBFD ], /* YEH Farsi */
 		[ 0x0686, 0xFB7A, 0xFB7C, 0xFB7D, 0xFB7B ], /* CHEH */
 		[ 0x067E, 0xFB56, 0xFB58, 0xFB59, 0xFB57 ],
 		[ 0x06AF, 0xFB92, 0xFB94, 0xFB95, 0xFB93 ],

@@ -84,6 +84,16 @@ Object.keys(shapers).forEach(function (name) {
 				assert.strictEqual(hex(convertArabic("ـبـ")), "0640 FE92 0640");
 			});
 
+			it("outputs forms that NFKC-normalise back to the input", function () {
+				dualJoining.concat(rightJoining).forEach(function (row) {
+					var text = row[0] + " " + row[0] + row[0] + row[0] + " ب" + row[0] + "ب";
+					assert.strictEqual(convertArabic(text).normalize("NFKC"), text, row[0]);
+				});
+				[ "مرحبا بالعالم", "لا إله إلا الله", "الآن لأن" ].forEach(function (text) {
+					assert.strictEqual(convertArabic(text).normalize("NFKC"), text, text);
+				});
+			});
+
 			it("returns strings", function () {
 				assert.strictEqual(typeof convertArabic("كتب"), "string");
 				assert.strictEqual(typeof convertArabicBack("ﻛﺘﺐ"), "string");

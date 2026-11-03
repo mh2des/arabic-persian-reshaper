@@ -58,6 +58,16 @@ describe("PersianShaper", function () {
 			assert.strictEqual(hex(convertArabic("بى")), "FE91 FEF0");
 			assert.strictEqual(hex(convertArabic("بی")), "FE91 FBFD");
 		});
+
+		it("outputs forms that NFKC-normalise back to the same letter", function () {
+			dualJoining.forEach(function (row) {
+				var text = row[0] + " " + row[0] + row[0] + row[0];
+				assert.strictEqual(convertArabic(text).normalize("NFKC"), text, row[0]);
+			});
+			[ "ژاله", "بى", "بی", "می‌خواهم" ].forEach(function (text) {
+				assert.strictEqual(convertArabic(text).normalize("NFKC"), text, text);
+			});
+		});
 	});
 
 	describe("convertArabicBack", function () {

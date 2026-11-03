@@ -54,31 +54,46 @@ describe("ArabicShaper", function () {
 		});
 	});
 
-	describe("alef maksura", function () {
-		it("shapes isolated ى", function () {
+	/*
+		Up to 1.0.1 ArabicShaper swapped the final forms of alef maksura
+		(U+0649) and Farsi yeh (U+06CC): ى ended as U+FBFD and ی as U+FEF0.
+		The glyphs look alike in many fonts, but NFKC-normalising the shaped
+		"على" gave "علی", a different letter.
+	*/
+	describe("alef maksura and Farsi yeh", function () {
+		it("shapes ى as isolated, initial, medial and final", function () {
 			assert.strictEqual(hex(convertArabic("ى")), "FEEF");
+			assert.strictEqual(hex(convertArabic("ىىى")), "FBE8 FBE9 FEF0");
 		});
 
-		it("round trips words ending in ى", function () {
-			assert.strictEqual(convertArabicBack(convertArabic("على")), "على");
-			assert.strictEqual(convertArabicBack(convertArabic("إلى مستشفى")), "إلى مستشفى");
+		it("shapes ی as isolated, initial, medial and final", function () {
+			assert.strictEqual(hex(convertArabic("ی")), "FBFC");
+			assert.strictEqual(hex(convertArabic("ییی")), "FBFE FBFF FBFD");
 		});
 
-		/*
-			Bug: ArabicShaper swaps the final forms of alef maksura (U+0649)
-			and Farsi yeh (U+06CC). ى ends as U+FBFD ARABIC LETTER FARSI YEH
-			FINAL FORM and ی as U+FEF0 ARABIC LETTER ALEF MAKSURA FINAL FORM.
-			The swap is deliberate (see the comment in ArabicShaper.js) and the
-			glyphs look alike, but the code points are wrong per Unicode:
-			NFKC-normalising the output of "على" gives "علی", a different
-			letter. PersianShaper uses the correct code points.
-		*/
-		it("uses U+FEF0 for final ى", { todo: "final forms of ى and ی are swapped" }, function () {
+		it("uses U+FEF0 for final ى", function () {
 			assert.strictEqual(hex(convertArabic("على")), "FECB FEE0 FEF0");
 		});
 
-		it("uses U+FBFD for final ی", { todo: "final forms of ى and ی are swapped" }, function () {
+		it("uses U+FBFD for final ی", function () {
 			assert.strictEqual(hex(convertArabic("بی")), "FE91 FBFD");
+		});
+
+		it("outputs forms that NFKC-normalise back to the same letter", function () {
+			[ "على", "إلى مستشفى", "بی", "ىىى ى", "ییی ی" ].forEach(function (text) {
+				assert.strictEqual(convertArabic(text).normalize("NFKC"), text, text);
+			});
+		});
+
+		it("restores ى and ی from every form", function () {
+			assert.strictEqual(convertArabicBack("ﻯﯨﯩﻰ"), "ىىىى");
+			assert.strictEqual(convertArabicBack("ﯼﯾﯿﯽ"), "یییی");
+		});
+
+		[ "على", "إلى مستشفى", "ىىى ى", "ییی ی", "فی", "على ی" ].forEach(function (text) {
+			it("round trips " + JSON.stringify(text), function () {
+				assert.strictEqual(convertArabicBack(convertArabic(text)), text);
+			});
 		});
 	});
 });
