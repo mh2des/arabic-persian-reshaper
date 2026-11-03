@@ -77,30 +77,42 @@ describe("PersianShaper", function () {
 	});
 
 	/*
-		Bug: PersianShaper's combCharsMap has the lam + أ/إ/آ ligatures
-		commented out, but convertArabic still takes the ligature branch
-		for them. GetCombCharRep returns false and String.fromCharCode
-		emits U+0000 in place of both letters, so "لآلی" (pearls) currently
-		becomes 0000 FEDF FBFD. These tests expect the same ligatures as
-		ArabicShaper.
+		Up to 1.0.1 these ligatures were commented out of combCharsMap while
+		convertArabic still took the ligature branch for them, so lam + أ/إ/آ
+		became U+0000 and "لآلی" (pearls) became 0000 FEDF FBFD. They now
+		match ArabicShaper.
 	*/
 	describe("lam-alef ligatures with hamza and madda", function () {
-		var todo = { todo: "lam + أ/إ/آ is replaced by U+0000" };
-
-		it("forms لأ لإ لآ at the start of a word", todo, function () {
+		it("forms لأ لإ لآ at the start of a word", function () {
 			assert.strictEqual(hex(convertArabic("لأ")), "FEF7");
 			assert.strictEqual(hex(convertArabic("لإ")), "FEF9");
 			assert.strictEqual(hex(convertArabic("لآ")), "FEF5");
 		});
 
-		it("forms the final لأ لإ لآ after a joining letter", todo, function () {
+		it("forms the final لأ لإ لآ after a joining letter", function () {
 			assert.strictEqual(hex(convertArabic("بلأ")), "FE91 FEF8");
 			assert.strictEqual(hex(convertArabic("بلإ")), "FE91 FEFA");
 			assert.strictEqual(hex(convertArabic("بلآ")), "FE91 FEF6");
 		});
 
-		[ "لآلی", "تلألؤ" ].forEach(function (text) {
-			it("round trips " + JSON.stringify(text), todo, function () {
+		it("shapes words containing the ligatures", function () {
+			assert.strictEqual(hex(convertArabic("لآلی")), "FEF5 FEDF FBFD");
+			assert.strictEqual(hex(convertArabic("تلألؤ")), "FE97 FEF8 FEDF FE86");
+		});
+
+		it("keeps a diacritic between lam and أ", function () {
+			assert.strictEqual(hex(convertArabic("لَأ")), "FEF7 064E");
+			assert.strictEqual(hex(convertArabic("بلَأ")), "FE91 FEF8 064E");
+		});
+
+		it("splits the ligatures back into lam and alef", function () {
+			assert.strictEqual(convertArabicBack("ﻷﻸ"), "لألأ");
+			assert.strictEqual(convertArabicBack("ﻹﻺ"), "لإلإ");
+			assert.strictEqual(convertArabicBack("ﻵﻶ"), "لآلآ");
+		});
+
+		[ "لآلی", "تلألؤ", "لأن", "لإبراهیم", "بلأ بلإ بلآ" ].forEach(function (text) {
+			it("round trips " + JSON.stringify(text), function () {
 				assert.strictEqual(convertArabicBack(convertArabic(text)), text);
 			});
 		});

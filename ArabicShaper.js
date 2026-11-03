@@ -183,11 +183,13 @@ function convertArabic(normal) {
 				next = null;
 			}
 
-			// /* Combinations */
-			if ( current == 0x0644 && next != null &&
-				( next == 0x0622 || next == 0x0623 || next == 0x0625 || next == 0x0627) ) {
-				
-				combcrep = GetCombCharRep(current, next);
+			/*
+				Combinations: take the ligature only when combCharsMap has
+				this pair. Otherwise fall through and shape lam and alef
+				separately, so a missing pair can never output U+0000.
+				*/
+			combcrep = ( current == 0x0644 && next != null ) ? GetCombCharRep(current, next) : false;
+			if ( combcrep ) {
 				if ( prev != null ) {
 					shaped += String.fromCharCode(combcrep[4]);
 				} else {

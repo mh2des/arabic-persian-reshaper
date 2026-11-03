@@ -148,6 +148,16 @@ Object.keys(shapers).forEach(function (name) {
 				assert.strictEqual(hex(convertArabic("بلَاب")), "FE91 FEFC 064E FE8F");
 				assert.strictEqual(hex(convertArabic("لَابب")), "FEFB 064E FE91 FE90");
 			});
+
+			it("never outputs U+0000 for lam followed by any letter", function () {
+				var letters = dualJoining.concat(rightJoining).map(function (row) { return row[0]; }).concat([ "ء", "ـ" ]);
+				letters.forEach(function (letter) {
+					[ "ل", "بل", "لَ", "بلَ" ].forEach(function (prefix) {
+						var shaped = convertArabic(prefix + letter);
+						assert.strictEqual(shaped.indexOf("\u0000"), -1, prefix + letter + " -> " + hex(shaped));
+					});
+				});
+			});
 		});
 
 		describe("diacritics", function () {
